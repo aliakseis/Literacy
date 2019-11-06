@@ -1,12 +1,19 @@
+#include "mainwindow.h"
+#include "screencapturer.h"
+
+#include "QLanguageComboBox.h"
+
 #include <QApplication>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QKeyEvent>
 #include <QSplitter>
+#include <QComboBox>
 #include <QDebug>
 
-#include "mainwindow.h"
-#include "screencapturer.h"
+#include "tesseract/genericvector.h"
+#include "tesseract/strngs.h"
+
 
 const char TESSDATA_PREFIX[] = "C:/Program Files (x86)/Tesseract-OCR/tessdata";
 
@@ -15,8 +22,11 @@ const char MODEL[] = "/model/frozen_east_text_detection.pb";
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
     , currentImage(nullptr)
-    , tesseractAPI(nullptr)
+    , tesseractAPI(new tesseract::TessBaseAPI())
 {
+    if (tesseractAPI->Init(TESSDATA_PREFIX, "eng")) {
+        QMessageBox::information(this, "Error", "Could not initialize tesseract.");
+    }
     initUI();
 }
 
@@ -25,7 +35,7 @@ MainWindow::~MainWindow()
     // Destroy used object and release memory
     if(tesseractAPI != nullptr) {
         tesseractAPI->End();
-        delete tesseractAPI;
+        //delete tesseractAPI;
     }
 }
 
@@ -83,6 +93,12 @@ void MainWindow::createActions()
     detectAreaCheckBox = new QCheckBox("Detect Text Areas", this);
     fileToolBar->addWidget(detectAreaCheckBox);
 
+    chooseLanguage = new QLanguageComboBox(this);
+    fileToolBar->addWidget(chooseLanguage);
+    chooseLanguage->addItem("eng");
+    chooseLanguage->setCurrentIndex(0);
+    chooseLanguage->setMinimumWidth(200);
+
     // connect the signals and slots
     connect(exitAction, SIGNAL(triggered(bool)), QApplication::instance(), SLOT(quit()));
     connect(openAction, SIGNAL(triggered(bool)), this, SLOT(openImage()));
@@ -90,6 +106,8 @@ void MainWindow::createActions()
     connect(saveTextAsAction, SIGNAL(triggered(bool)), this, SLOT(saveTextAs()));
     connect(ocrAction, SIGNAL(triggered(bool)), this, SLOT(extractText()));
     connect(captureAction, SIGNAL(triggered(bool)), this, SLOT(captureScreen()));
+
+    connect(chooseLanguage, &QLanguageComboBox::onShowPopup, this, &MainWindow::onShowLanguagePopup);
 
     setupShortcuts();
 }
@@ -210,10 +228,26 @@ void MainWindow::extractText()
 
     char *old_ctype = strdup(setlocale(LC_ALL, NULL));
     setlocale(LC_ALL, "C");
-    if (tesseractAPI == nullptr) {
-        tesseractAPI = new tesseract::TessBaseAPI();
+    //if (tesseractAPI == nullptr) {
+    GenericVector<STRING> langs;
+    tesseractAPI->GetLoadedLanguagesAsVector(&langs);
+    //langs.sort();
+
+    const STRING lang(chooseLanguage->currentText().toStdString().c_str());
+
+    int i;
+    for (i = langs.length(); --i >= 0; )
+    {
+        if (langs[i] == lang)
+            break;
+    }
+
+    //if (tesseractAPI->)
+    if (i == -1)
+    {
+        //tesseractAPI = new tesseract::TessBaseAPI();
         // Initialize tesseract-ocr with English, with specifying tessdata path
-        if (tesseractAPI->Init(TESSDATA_PREFIX, "eng")) {
+        if (tesseractAPI->Init(TESSDATA_PREFIX, lang.c_str())) {
             QMessageBox::information(this, "Error", "Could not initialize tesseract.");
             return;
         }
@@ -367,4 +401,26 @@ void MainWindow::startCapture()
     ScreenCapturer *cap = new ScreenCapturer(this);
     cap->show();
     cap->activateWindow();
+}
+
+void MainWindow::onShowLanguagePopup()
+{
+    if (langListLoaded)
+        return;
+
+    if (auto source = static_cast<QComboBox*>(sender()))
+    {
+        GenericVector<STRING> langs;
+        tesseractAPI->GetAvailableLanguagesAsVector(&langs);
+        for (int i = 0; i < langs.length(); ++i)
+        {
+            const auto& lang = langs[i];
+            if (lang != "eng")
+            {
+                source->addItem(lang.c_str());
+            }
+        }
+
+        langListLoaded = true;
+    }
 }

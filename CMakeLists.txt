@@ -39,7 +39,7 @@ find_package(OpenCV REQUIRED)
 #qt5_add_resources(QRCS tiles.qrc)
 
 # Tell CMake to create the Tiles executable
-add_executable(Literacy main.cpp mainwindow.cpp screencapturer.cpp ${QRCS})
+add_executable(Literacy main.cpp mainwindow.cpp screencapturer.cpp QLanguageComboBox.cpp ${QRCS})
 
 # Add the Qt5 Widgets for linking
 target_link_libraries(Literacy Qt5::Widgets libtesseract ${OpenCV_LIBS})

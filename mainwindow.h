@@ -20,6 +20,11 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/dnn.hpp"
 
+#include <memory>
+
+
+class QLanguageComboBox;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -35,6 +40,8 @@ private:
     void showImage(QString);
     void showImage(cv::Mat);
     void setupShortcuts();
+
+    void onShowLanguagePopup();
 
     void decode(const cv::Mat& scores, const cv::Mat& geometry, float scoreThresh,
         std::vector<cv::RotatedRect>& detections, std::vector<float>& confidences);
@@ -69,11 +76,15 @@ private:
     QAction *ocrAction;
     QCheckBox *detectAreaCheckBox;
 
+    QLanguageComboBox* chooseLanguage;
+
     QString currentImagePath;
     QGraphicsPixmapItem *currentImage;
 
-    tesseract::TessBaseAPI *tesseractAPI;
+    std::unique_ptr<tesseract::TessBaseAPI> tesseractAPI;
     cv::dnn::Net net;
+
+    bool langListLoaded = false;
 };
 
 #endif // MAINWINDOW_H
