@@ -19,12 +19,14 @@ const char TESSDATA_PREFIX[] = "C:/Program Files (x86)/Tesseract-OCR/tessdata";
 
 const char MODEL[] = "/model/frozen_east_text_detection.pb";
 
+const char LANGUAGE_ENGLISH[] = "eng";
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
     , currentImage(nullptr)
     , tesseractAPI(new tesseract::TessBaseAPI())
 {
-    if (tesseractAPI->Init(TESSDATA_PREFIX, "eng")) {
+    if (tesseractAPI->Init(TESSDATA_PREFIX, LANGUAGE_ENGLISH)) {
         QMessageBox::information(this, "Error", "Could not initialize tesseract.");
     }
     initUI();
@@ -95,7 +97,7 @@ void MainWindow::createActions()
 
     chooseLanguage = new QLanguageComboBox(this);
     fileToolBar->addWidget(chooseLanguage);
-    chooseLanguage->addItem("eng");
+    chooseLanguage->addItem(LANGUAGE_ENGLISH);
     chooseLanguage->setCurrentIndex(0);
     chooseLanguage->setMinimumWidth(200);
 
@@ -228,10 +230,8 @@ void MainWindow::extractText()
 
     char *old_ctype = strdup(setlocale(LC_ALL, NULL));
     setlocale(LC_ALL, "C");
-    //if (tesseractAPI == nullptr) {
     GenericVector<STRING> langs;
     tesseractAPI->GetLoadedLanguagesAsVector(&langs);
-    //langs.sort();
 
     const STRING lang(chooseLanguage->currentText().toStdString().c_str());
 
@@ -242,11 +242,9 @@ void MainWindow::extractText()
             break;
     }
 
-    //if (tesseractAPI->)
     if (i == -1)
     {
-        //tesseractAPI = new tesseract::TessBaseAPI();
-        // Initialize tesseract-ocr with English, with specifying tessdata path
+        // Initialize tesseract-ocr with language, with specifying tessdata path
         if (tesseractAPI->Init(TESSDATA_PREFIX, lang.c_str())) {
             QMessageBox::information(this, "Error", "Could not initialize tesseract.");
             return;
@@ -415,7 +413,7 @@ void MainWindow::onShowLanguagePopup()
         for (int i = 0; i < langs.length(); ++i)
         {
             const auto& lang = langs[i];
-            if (lang != "eng")
+            if (lang != LANGUAGE_ENGLISH)
             {
                 source->addItem(lang.c_str());
             }
