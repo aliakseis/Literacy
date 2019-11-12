@@ -32,14 +32,12 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent=nullptr);
     ~MainWindow();
-    void showImage(QPixmap);
+    void showImage(const QPixmap&);
 
 private:
     void initUI();
-    void createActions();
-    void showImage(QString);
-    void showImage(cv::Mat);
-    void setupShortcuts();
+    void showImage(const QString&);
+    void showImage(const cv::Mat&);
 
     void onShowLanguagePopup();
 
@@ -56,27 +54,16 @@ private slots:
     void startCapture();
 
 private:
-    QMenu *fileMenu;
-
-    QToolBar *fileToolBar;
-
     QGraphicsScene *imageScene;
     QGraphicsView *imageView;
 
-    QTextEdit *editor;
-
-    QStatusBar *mainStatusBar;
     QLabel *mainStatusLabel;
 
-    QAction *openAction;
-    QAction *saveImageAsAction;
-    QAction *saveTextAsAction;
-    QAction *exitAction;
-    QAction *captureAction;
-    QAction *ocrAction;
-    QCheckBox *detectAreaCheckBox;
+    QTextEdit *editor;
 
     QLanguageComboBox* chooseLanguage;
+
+    QCheckBox *detectAreaCheckBox;
 
     QString currentImagePath;
     QGraphicsPixmapItem *currentImage;

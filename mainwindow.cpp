@@ -37,21 +37,20 @@ MainWindow::~MainWindow()
     // Destroy used object and release memory
     if(tesseractAPI != nullptr) {
         tesseractAPI->End();
-        //delete tesseractAPI;
     }
 }
 
 void MainWindow::initUI()
 {
-    this->resize(800, 600);
+    resize(800, 600);
     // setup menubar
-    fileMenu = menuBar()->addMenu("&File");
+    auto fileMenu = menuBar()->addMenu("&File");
 
     // setup toolbar
-    fileToolBar = addToolBar("File");
+    auto fileToolBar = addToolBar("File");
 
     // main area
-    QSplitter *splitter = new QSplitter(Qt::Horizontal, this);
+    auto splitter = new QSplitter(Qt::Horizontal, this);
 
     imageScene = new QGraphicsScene(this);
     imageView = new QGraphicsView(imageScene);
@@ -66,31 +65,26 @@ void MainWindow::initUI()
     setCentralWidget(splitter);
 
     // setup status bar
-    mainStatusBar = statusBar();
+    auto mainStatusBar = statusBar();
     mainStatusLabel = new QLabel(mainStatusBar);
     mainStatusBar->addPermanentWidget(mainStatusLabel);
     mainStatusLabel->setText("Application Information will be here!");
 
-    createActions();
-}
-
-void MainWindow::createActions()
-{
     // create actions, add them to menus
-    openAction = new QAction("&Open", this);
+    auto openAction = new QAction("&Open", this);
     fileMenu->addAction(openAction);
-    saveImageAsAction = new QAction("Save &Image as", this);
+    auto saveImageAsAction = new QAction("Save &Image as", this);
     fileMenu->addAction(saveImageAsAction);
-    saveTextAsAction = new QAction("Save &Text as", this);
+    auto saveTextAsAction = new QAction("Save &Text as", this);
     fileMenu->addAction(saveTextAsAction);
-    exitAction = new QAction("E&xit", this);
+    auto exitAction = new QAction("E&xit", this);
     fileMenu->addAction(exitAction);
 
     // add actions to toolbars
     fileToolBar->addAction(openAction);
-    captureAction = new QAction("Capture Screen", this);
+    auto captureAction = new QAction("Capture Screen", this);
     fileToolBar->addAction(captureAction);
-    ocrAction = new QAction("OCR", this);
+    auto ocrAction = new QAction("OCR", this);
     fileToolBar->addAction(ocrAction);
     detectAreaCheckBox = new QCheckBox("Detect Text Areas", this);
     fileToolBar->addWidget(detectAreaCheckBox);
@@ -111,7 +105,9 @@ void MainWindow::createActions()
 
     connect(chooseLanguage, &QLanguageComboBox::onShowPopup, this, &MainWindow::onShowLanguagePopup);
 
-    setupShortcuts();
+    //setup shortcuts
+    openAction->setShortcuts({Qt::CTRL + Qt::Key_O});
+    exitAction->setShortcuts({Qt::CTRL + Qt::Key_Q});
 }
 
 void MainWindow::openImage()
@@ -128,7 +124,7 @@ void MainWindow::openImage()
 }
 
 
-void MainWindow::showImage(QPixmap image)
+void MainWindow::showImage(const QPixmap& image)
 {
     imageScene->clear();
     imageView->resetMatrix();
@@ -137,7 +133,7 @@ void MainWindow::showImage(QPixmap image)
     imageView->setSceneRect(image.rect());
  }
 
-void MainWindow::showImage(QString path)
+void MainWindow::showImage(const QString& path)
 {
     QPixmap image(path);
     showImage(image);
@@ -147,7 +143,7 @@ void MainWindow::showImage(QString path)
     mainStatusLabel->setText(status);
 }
 
-void MainWindow::showImage(cv::Mat mat)
+void MainWindow::showImage(const cv::Mat& mat)
 {
     QImage image(
         mat.data,
@@ -210,16 +206,6 @@ void MainWindow::saveTextAs()
     }
 }
 
-void MainWindow::setupShortcuts()
-{
-    QList<QKeySequence> shortcuts;
-    shortcuts << (Qt::CTRL + Qt::Key_O);
-    openAction->setShortcuts(shortcuts);
-
-    shortcuts.clear();
-    shortcuts << (Qt::CTRL + Qt::Key_Q);
-    exitAction->setShortcuts(shortcuts);
-}
 
 void MainWindow::extractText()
 {
@@ -285,7 +271,6 @@ cv::Mat MainWindow::detectTextAreas(QImage &image, std::vector<cv::Rect> &areas)
     float nmsThreshold = 0.4;
     int inputWidth = 320;
     int inputHeight = 320;
-    //std::string model = "./frozen_east_text_detection.pb";
     // Load DNN network.
     if (net.empty()) {
         net = cv::dnn::readNet(MODEL);
@@ -396,7 +381,7 @@ void MainWindow::captureScreen()
 
 void MainWindow::startCapture()
 {
-    ScreenCapturer *cap = new ScreenCapturer(this);
+    auto *cap = new ScreenCapturer(this);
     cap->show();
     cap->activateWindow();
 }
