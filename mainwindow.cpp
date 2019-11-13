@@ -14,8 +14,6 @@
 #include "tesseract/genericvector.h"
 #include "tesseract/strngs.h"
 
-const char MODEL[] = "/model/frozen_east_text_detection.pb";
-
 namespace {
 
 void decode(const cv::Mat& scores, const cv::Mat& geometry, float scoreThresh,
@@ -68,15 +66,12 @@ cv::Mat detectTextAreas(cv::dnn::Net& net, QImage &image, std::vector<cv::Rect> 
     float nmsThreshold = 0.4;
     int inputWidth = 320;
     int inputHeight = 320;
-    // Load DNN network.
-    if (net.empty()) {
-        net = cv::dnn::readNet(MODEL);
-    }
 
     std::vector<cv::Mat> outs;
-    std::vector<cv::String> layerNames(2);
-    layerNames[0] = "feature_fusion/Conv_7/Sigmoid";
-    layerNames[1] = "feature_fusion/concat_3";
+    std::vector<cv::String> layerNames{
+        "feature_fusion/Conv_7/Sigmoid",
+        "feature_fusion/concat_3"
+    };
 
     cv::Mat frame = cv::Mat(
         image.height(),
@@ -157,6 +152,8 @@ cv::Mat detectTextAreas(cv::dnn::Net& net, QImage &image, std::vector<cv::Rect> 
 const char TESSDATA_PREFIX[] = "C:/Program Files (x86)/Tesseract-OCR/tessdata";
 
 const char LANGUAGE_ENGLISH[] = "eng";
+
+const char MODEL[] = "/model/frozen_east_text_detection.pb";
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -382,6 +379,10 @@ void MainWindow::extractText()
         3, image.bytesPerLine());
 
     if (detectAreaCheckBox->checkState() == Qt::Checked) {
+        // Load DNN network.
+        if (net.empty()) {
+            net = cv::dnn::readNet(MODEL);
+        }
         std::vector<cv::Rect> areas;
         cv::Mat newImage = detectTextAreas(net, image, areas);
         showImage(newImage);
