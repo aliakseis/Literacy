@@ -41,10 +41,6 @@ private:
 
     void onShowLanguagePopup();
 
-    void decode(const cv::Mat& scores, const cv::Mat& geometry, float scoreThresh,
-        std::vector<cv::RotatedRect>& detections, std::vector<float>& confidences);
-    cv::Mat detectTextAreas(QImage &image, std::vector<cv::Rect>&);
-
 private slots:
     void openImage();
     void saveImageAs();
