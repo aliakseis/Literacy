@@ -318,6 +318,31 @@ cv::Mat MainWindow::detectTextAreas(QImage &image, std::vector<cv::Rect> &areas)
         area.width *= ratio.x;
         area.y *= ratio.y;
         area.height *= ratio.y;
+
+        if (area.x < 0)
+        {
+            area.width += area.x;
+            area.x = 0;
+        }
+        if (area.y < 0)
+        {
+            area.height += area.y;
+            area.y = 0;
+        }
+        if (area.x + area.width > frame.cols)
+        {
+            area.width = frame.cols - area.x;
+        }
+        if (area.y + area.height > frame.rows)
+        {
+            area.height = frame.rows - area.y;
+        }
+
+        if (area.width <= 0 || area.height <= 0)
+        {
+            continue;
+        }
+
         areas.push_back(area);
         cv::rectangle(frame, area, green, 1);
         QString index = QString("%1").arg(i);
