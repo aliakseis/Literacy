@@ -50,16 +50,16 @@ private slots:
     void startCapture();
 
 private:
-    QGraphicsScene *imageScene;
-    QGraphicsView *imageView;
+    QGraphicsScene *imageScene{};
+    QGraphicsView *imageView{};
 
-    QLabel *mainStatusLabel;
+    QLabel *mainStatusLabel{};
 
-    QTextEdit *editor;
+    QTextEdit *editor{};
 
-    QLanguageComboBox* chooseLanguage;
+    QLanguageComboBox* chooseLanguage{};
 
-    QCheckBox *detectAreaCheckBox;
+    QCheckBox *detectAreaCheckBox{};
 
     QString currentImagePath;
     QGraphicsPixmapItem *currentImage;

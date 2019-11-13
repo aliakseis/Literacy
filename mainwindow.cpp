@@ -14,6 +14,8 @@
 #include "tesseract/genericvector.h"
 #include "tesseract/strngs.h"
 
+#include <string>
+
 namespace {
 
 void decode(const cv::Mat& scores, const cv::Mat& geometry, float scoreThresh,
@@ -348,7 +350,7 @@ void MainWindow::extractText()
         return;
     }
 
-    char *old_ctype = strdup(setlocale(LC_ALL, NULL));
+    std::string old_ctype(setlocale(LC_ALL, nullptr));
     setlocale(LC_ALL, "C");
     GenericVector<STRING> langs;
     tesseractAPI->GetLoadedLanguagesAsVector(&langs);
@@ -394,13 +396,11 @@ void MainWindow::extractText()
             delete [] outText;
         }
     } else {
-        char *outText = tesseractAPI->GetUTF8Text();
-        editor->setPlainText(outText);
-        delete [] outText;
+        std::unique_ptr<char[]> outText { tesseractAPI->GetUTF8Text() };
+        editor->setPlainText(outText.get());
     }
 
-    setlocale(LC_ALL, old_ctype);
-    free(old_ctype);
+    setlocale(LC_ALL, old_ctype.c_str());
 }
 
 
