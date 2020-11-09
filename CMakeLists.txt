@@ -43,3 +43,33 @@ add_executable(Literacy main.cpp mainwindow.cpp screencapturer.cpp QLanguageComb
 
 # Add the Qt5 Widgets for linking
 target_link_libraries(Literacy Qt5::Widgets libtesseract ${OpenCV_LIBS})
+
+if(MSVC)
+        set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/bin")
+
+        set(BINARY_INSTALL_DIR .)
+
+        install(TARGETS ${PROJECT_NAME} DESTINATION ${BINARY_INSTALL_DIR})
+
+        set(BINARY_FILE "${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.exe")
+        get_filename_component(CMAKE_TOOLCHAIN_DIRECTORY ${CMAKE_TOOLCHAIN_FILE} DIRECTORY)
+
+        if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+            set( CMAKE_INSTALL_PLATFORM "x64-windows" )
+        else ()
+            set( CMAKE_INSTALL_PLATFORM "x86-windows" )
+        endif ()
+
+        install(CODE "execute_process(COMMAND \"powershell\" \"-noprofile\" \"-executionpolicy\" \"Bypass\" \"-file\" \"${CMAKE_TOOLCHAIN_DIRECTORY}/msbuild/applocal.ps1\" \"-targetBinary\" \"${BINARY_FILE}\" \"-installedDir\" \"${CMAKE_TOOLCHAIN_DIRECTORY}/../../installed/${CMAKE_INSTALL_PLATFORM}/bin\" \"-OutVariable\" \"out\")")
+
+        # Install CRT
+        set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
+        #if(DEVELOPER_FEATURES)
+        #	set(CMAKE_INSTALL_DEBUG_LIBRARIES ON)
+        #endif(DEVELOPER_FEATURES)
+        set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
+        include (InstallRequiredSystemLibraries)
+
+        install(CODE "execute_process(COMMAND \"windeployqt\"  \"${BINARY_FILE}\")")
+
+endif()
