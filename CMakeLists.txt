@@ -42,7 +42,7 @@ find_package(OpenCV REQUIRED)
 add_executable(Literacy main.cpp mainwindow.cpp screencapturer.cpp QLanguageComboBox.cpp ${QRCS})
 
 # Add the Qt5 Widgets for linking
-target_link_libraries(Literacy Qt5::Widgets libtesseract ${OpenCV_LIBS})
+target_link_libraries(Literacy Qt5::Widgets Tesseract::libtesseract ${OpenCV_LIBS})
 
 if(MSVC)
         set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/bin")
@@ -70,7 +70,13 @@ if(MSVC)
         set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
         include (InstallRequiredSystemLibraries)
 
-        get_filename_component(QT_BIN_DIRECTORY ${QT_QMAKE_EXECUTABLE} DIRECTORY)
-        install(CODE "execute_process(COMMAND \"${QT_BIN_DIRECTORY}/windeployqt\"  \"${BINARY_FILE}\" WORKING_DIRECTORY \"${QT_BIN_DIRECTORY}\")")
+# Retrieve the absolute path to qmake and then use that path to find
+# the windeployqt binary
+	get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
+	get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+	find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
+
+	install(CODE "execute_process(COMMAND \"${WINDEPLOYQT_EXECUTABLE}\"  \"${BINARY_FILE}\" WORKING_DIRECTORY \"${_qt_bin_dir}\")")
+
 
 endif()

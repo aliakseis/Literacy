@@ -11,9 +11,6 @@
 #include <QComboBox>
 #include <QDebug>
 
-#include "tesseract/genericvector.h"
-#include "tesseract/strngs.h"
-
 #include <string>
 
 namespace {
@@ -151,7 +148,7 @@ cv::Mat detectTextAreas(cv::dnn::Net& net, QImage &image, std::vector<cv::Rect> 
 } // namespace
 
 
-const char TESSDATA_PREFIX[] = "C:/Program Files (x86)/Tesseract-OCR/tessdata";
+const char TESSDATA_PREFIX[] = "C:/Program Files/Tesseract-OCR/tessdata";
 
 const char LANGUAGE_ENGLISH[] = "eng";
 
@@ -352,13 +349,13 @@ void MainWindow::extractText()
 
     std::string old_ctype(setlocale(LC_ALL, nullptr));
     setlocale(LC_ALL, "C");
-    GenericVector<STRING> langs;
+    std::vector<std::string> langs;
     tesseractAPI->GetLoadedLanguagesAsVector(&langs);
 
-    const STRING lang(chooseLanguage->currentText().toStdString().c_str());
+    const auto lang = chooseLanguage->currentText().toStdString();
 
     int i;
-    for (i = langs.length(); --i >= 0; )
+    for (i = langs.size(); --i >= 0; )
     {
         if (langs[i] == lang)
             break;
@@ -424,9 +421,9 @@ void MainWindow::onShowLanguagePopup()
 
     if (auto source = static_cast<QComboBox*>(sender()))
     {
-        GenericVector<STRING> langs;
+        std::vector<std::string> langs;
         tesseractAPI->GetAvailableLanguagesAsVector(&langs);
-        for (int i = 0; i < langs.length(); ++i)
+        for (size_t i = 0; i < langs.size(); ++i)
         {
             const auto& lang = langs[i];
             if (lang != LANGUAGE_ENGLISH)
