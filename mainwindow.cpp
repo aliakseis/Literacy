@@ -423,9 +423,8 @@ void MainWindow::onShowLanguagePopup()
     {
         std::vector<std::string> langs;
         tesseractAPI->GetAvailableLanguagesAsVector(&langs);
-        for (size_t i = 0; i < langs.size(); ++i)
+        for (const auto& lang : langs)
         {
-            const auto& lang = langs[i];
             if (lang != LANGUAGE_ENGLISH)
             {
                 source->addItem(lang.c_str());
